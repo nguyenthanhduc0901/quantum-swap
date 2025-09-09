@@ -22,6 +22,9 @@ contract QuantumSwapPair is ERC20, IQuantumSwapPair {
     /// @notice Address of the factory that deployed this pair
     address public immutable factory;
 
+    /// @dev Burn address to permanently lock initial liquidity
+    address private constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
+
     /// @inheritdoc IQuantumSwapPair
     address public token0;
 
@@ -130,7 +133,7 @@ contract QuantumSwapPair is ERC20, IQuantumSwapPair {
         uint256 _totalSupply = totalSupply; // gas save
         if (_totalSupply == 0) {
             liquidity = Math.sqrt(amount0 * amount1) - MINIMUM_LIQUIDITY;
-            _mint(address(0), MINIMUM_LIQUIDITY); // permanently lock
+            _mint(BURN_ADDRESS, MINIMUM_LIQUIDITY); // permanently lock
         } else {
             liquidity = Math.min((amount0 * _totalSupply) / _reserve0, (amount1 * _totalSupply) / _reserve1);
         }
