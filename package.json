@@ -1,0 +1,25 @@
+{
+  "name": "quantumswap",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "build": "hardhat compile",
+    "clean": "hardhat clean",
+    "test": "hardhat test",
+    "node": "hardhat node",
+    "deploy": "hardhat run --network hardhat scripts/placeholder.script.ts"
+  },
+  "devDependencies": {
+    "hardhat": "*",
+    "@nomicfoundation/hardhat-toolbox": "*",
+    "@openzeppelin/contracts": "*",
+    "solmate": "*",
+    "typescript": "*",
+    "ts-node": "*",
+    "@types/node": "*",
+    "@types/mocha": "*",
+    "@types/chai": "*"
+  }
+}
+
