@@ -53,6 +53,16 @@ describe("QuantumSwap Protocol", function () {
     return z;
   }
 
+  async function latestTs(): Promise<number> {
+    const block = await ethers.provider.getBlock("latest");
+    if (!block) throw new Error("No latest block");
+    return Number(block.timestamp);
+  }
+
+  async function plusSeconds(seconds: number): Promise<number> {
+    return (await latestTs()) + seconds;
+  }
+
   async function getPairAddress(tokenX: any, tokenY: any): Promise<string> {
     const pair = await factory.getPair(await tokenX.getAddress(), await tokenY.getAddress());
     return pair;
@@ -115,7 +125,7 @@ describe("QuantumSwap Protocol", function () {
         0,
         0,
         user1.address,
-        (await ethers.provider.getBlock("latest")).timestamp + 3600
+        await plusSeconds(3600)
       );
 
       const userLP = await pair.balanceOf(user1.address);
@@ -139,7 +149,7 @@ describe("QuantumSwap Protocol", function () {
         0,
         0,
         user1.address,
-        (await ethers.provider.getBlock("latest")).timestamp + 3600
+        await plusSeconds(3600)
       );
 
       const pairAddr = await getPairAddress(tokenA, tokenB);
@@ -154,7 +164,7 @@ describe("QuantumSwap Protocol", function () {
         0,
         0,
         user1.address,
-        (await ethers.provider.getBlock("latest")).timestamp + 3600
+        await plusSeconds(3600)
       );
 
       const reserves = await pair.getReserves();
@@ -172,7 +182,7 @@ describe("QuantumSwap Protocol", function () {
         0,
         0,
         user1.address,
-        (await ethers.provider.getBlock("latest")).timestamp + 3600,
+        await plusSeconds(3600),
         { value: amountETH }
       );
       const pairAB = await factory.getPair(await tokenA.getAddress(), await weth.getAddress());
@@ -182,7 +192,7 @@ describe("QuantumSwap Protocol", function () {
     it("removeLiquidity burns LP and returns tokens", async function () {
       const amountA = ethers.parseEther("1000");
       const amountB = ethers.parseEther("1000");
-      const deadline = (await ethers.provider.getBlock("latest")).timestamp + 3600;
+      const deadline = await plusSeconds(3600);
       await router.connect(user1).addLiquidity(
         await tokenA.getAddress(),
         await tokenB.getAddress(),
@@ -195,7 +205,7 @@ describe("QuantumSwap Protocol", function () {
       );
       const pairAddr = await getPairAddress(tokenA, tokenB);
       const Pair = await ethers.getContractFactory("QuantumSwapPair");
-      const pair = Pair.attach(pairAddr);
+      const pair = await Pair.attach(pairAddr) as any;
       const lpBal = await pair.balanceOf(user1.address);
       await pair.connect(user1).approve(await router.getAddress(), lpBal);
       await router.connect(user1).removeLiquidity(
@@ -212,7 +222,7 @@ describe("QuantumSwap Protocol", function () {
     });
 
     it("removeLiquidityETH unwraps to ETH", async function () {
-      const deadline = (await ethers.provider.getBlock("latest")).timestamp + 3600;
+      const deadline = await plusSeconds(3600);
       await router.connect(user1).addLiquidityETH(
         await tokenA.getAddress(),
         ethers.parseEther("10"),
@@ -224,7 +234,7 @@ describe("QuantumSwap Protocol", function () {
       );
       const pairAddr = await factory.getPair(await tokenA.getAddress(), await weth.getAddress());
       const Pair = await ethers.getContractFactory("QuantumSwapPair");
-      const pair = Pair.attach(pairAddr);
+      const pair = await Pair.attach(pairAddr) as any;
       const lp = await pair.balanceOf(user1.address);
       await pair.connect(user1).approve(await router.getAddress(), lp);
       await router.connect(user1).removeLiquidityETH(
@@ -255,7 +265,7 @@ describe("QuantumSwap Protocol", function () {
         0,
         0,
         user1.address,
-        (await ethers.provider.getBlock("latest")).timestamp + 3600
+        await plusSeconds(3600)
       );
     });
 
@@ -269,7 +279,7 @@ describe("QuantumSwap Protocol", function () {
         outMin,
         path,
         user1.address,
-        (await ethers.provider.getBlock("latest")).timestamp + 3600
+        await plusSeconds(3600)
       );
       const balAfter = await tokenB.balanceOf(user1.address);
       expect(balAfter - balBefore).to.be.gte(outMin);
@@ -283,7 +293,7 @@ describe("QuantumSwap Protocol", function () {
           0,
           path,
           user1.address,
-          (await ethers.provider.getBlock("latest")).timestamp - 1
+          await plusSeconds(-1)
         )
       ).to.be.revertedWith("QuantumSwap: EXPIRED");
     });
@@ -299,7 +309,7 @@ describe("QuantumSwap Protocol", function () {
         0,
         0,
         owner.address,
-        (await ethers.provider.getBlock("latest")).timestamp + 3600,
+        await plusSeconds(3600),
         { value: ethers.parseEther("50") }
       );
       const balBefore = await tokenA.balanceOf(user1.address);
@@ -307,7 +317,7 @@ describe("QuantumSwap Protocol", function () {
         0,
         path,
         user1.address,
-        (await ethers.provider.getBlock("latest")).timestamp + 3600,
+        (await ethers.provider.getBlock("latest"))!.timestamp + 3600,
         { value: ethers.parseEther("1") }
       );
       const balAfter = await tokenA.balanceOf(user1.address);
@@ -325,7 +335,7 @@ describe("QuantumSwap Protocol", function () {
         0,
         0,
         owner.address,
-        (await ethers.provider.getBlock("latest")).timestamp + 3600,
+        await plusSeconds(3600),
         { value: ethers.parseEther("50") }
       );
       const balBefore = await ethers.provider.getBalance(user1.address);
@@ -335,7 +345,7 @@ describe("QuantumSwap Protocol", function () {
         0,
         path,
         user1.address,
-        (await ethers.provider.getBlock("latest")).timestamp + 3600
+        (await ethers.provider.getBlock("latest"))!.timestamp + 3600
       );
       const balAfter = await ethers.provider.getBalance(user1.address);
       expect(balAfter).to.be.gt(balBefore);
@@ -360,7 +370,7 @@ describe("QuantumSwap Protocol", function () {
         0,
         0,
         owner.address,
-        (await ethers.provider.getBlock("latest")).timestamp + 3600
+        (await ethers.provider.getBlock("latest"))!.timestamp + 3600
       );
 
       const path = [await tokenA.getAddress(), await tokenB.getAddress(), await tokenC.getAddress()];
@@ -371,7 +381,7 @@ describe("QuantumSwap Protocol", function () {
         0,
         path,
         user1.address,
-        (await ethers.provider.getBlock("latest")).timestamp + 3600
+        (await ethers.provider.getBlock("latest"))!.timestamp + 3600
       );
       const balAfter = await tokenC.balanceOf(user1.address);
       expect(balAfter).to.be.gt(balBefore);
@@ -384,7 +394,7 @@ describe("QuantumSwap Protocol", function () {
       await factory.createPair(await tokenA.getAddress(), await tokenB.getAddress());
       await tokenA.approve(await router.getAddress(), ethers.MaxUint256);
       await tokenB.approve(await router.getAddress(), ethers.MaxUint256);
-      const deadline = (await ethers.provider.getBlock("latest")).timestamp + 3600;
+      const deadline = (await ethers.provider.getBlock("latest"))!.timestamp + 3600;
       await router.addLiquidity(
         await tokenA.getAddress(),
         await tokenB.getAddress(),
@@ -428,7 +438,7 @@ describe("QuantumSwap Protocol", function () {
       await factory.createPair(await tokenA.getAddress(), await tokenB.getAddress());
       await tokenA.approve(await router.getAddress(), ethers.MaxUint256);
       await tokenB.approve(await router.getAddress(), ethers.MaxUint256);
-      const deadline = (await ethers.provider.getBlock("latest")).timestamp + 3600;
+      const deadline = (await ethers.provider.getBlock("latest"))!.timestamp + 3600;
       await router.addLiquidity(
         await tokenA.getAddress(),
         await tokenB.getAddress(),
@@ -454,7 +464,7 @@ describe("QuantumSwap Protocol", function () {
       // perform a trade to update reserves and cumulatives
       await tokenA.mint(user2.address, ethers.parseEther("10"));
       await tokenA.connect(user2).approve(await router.getAddress(), ethers.MaxUint256);
-      const deadline2 = (await ethers.provider.getBlock("latest")).timestamp + 3600;
+      const deadline2 = (await ethers.provider.getBlock("latest"))!.timestamp + 3600;
       await router.connect(user2).swapExactTokensForTokens(
         ethers.parseEther("10"), 0, [await tokenA.getAddress(), await tokenB.getAddress()], user2.address, deadline2
       );
