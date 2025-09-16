@@ -20,10 +20,22 @@ contract QuantumSwapFactory is IQuantumSwapFactory {
     /// @notice List of all pairs created by the factory
     address[] public override allPairs;
 
+    /// @notice Emergency pause state
+    bool public paused = false;
+
+    /// @notice Address authorized to pause/unpause the system
+    address public pauser;
+
+    /// @notice Events for pause functionality
+    event Paused(address indexed account);
+    event Unpaused(address indexed account);
+    event PauserChanged(address indexed oldPauser, address indexed newPauser);
+
     /// @notice Initializes the factory with a fee setter
     /// @param _feeToSetter The initial address authorized to set the protocol fee recipient
     constructor(address _feeToSetter) {
         feeToSetter = _feeToSetter;
+        pauser = _feeToSetter; // Initially, fee setter is also the pauser
     }
 
     /// @inheritdoc IQuantumSwapFactory
@@ -33,6 +45,7 @@ contract QuantumSwapFactory is IQuantumSwapFactory {
 
     /// @inheritdoc IQuantumSwapFactory
     function createPair(address tokenA, address tokenB) external override returns (address pair) {
+        require(!paused, "FACTORY: PAUSED");
         require(tokenA != tokenB, "FACTORY: IDENTICAL_ADDRESSES");
 
         // Sort tokens to enforce uniqueness
@@ -69,6 +82,31 @@ contract QuantumSwapFactory is IQuantumSwapFactory {
     function setFeeToSetter(address _feeToSetter) external override {
         require(msg.sender == feeToSetter, "FACTORY: FORBIDDEN");
         feeToSetter = _feeToSetter;
+    }
+
+    /// @notice Pause the factory to prevent new pair creation
+    function pause() external {
+        require(msg.sender == pauser, "FACTORY: NOT_PAUSER");
+        require(!paused, "FACTORY: ALREADY_PAUSED");
+        paused = true;
+        emit Paused(msg.sender);
+    }
+
+    /// @notice Unpause the factory to allow new pair creation
+    function unpause() external {
+        require(msg.sender == pauser, "FACTORY: NOT_PAUSER");
+        require(paused, "FACTORY: NOT_PAUSED");
+        paused = false;
+        emit Unpaused(msg.sender);
+    }
+
+    /// @notice Change the pauser address
+    function setPauser(address _pauser) external {
+        require(msg.sender == pauser, "FACTORY: NOT_PAUSER");
+        require(_pauser != address(0), "FACTORY: ZERO_ADDRESS");
+        address oldPauser = pauser;
+        pauser = _pauser;
+        emit PauserChanged(oldPauser, _pauser);
     }
 }
 

@@ -45,16 +45,36 @@ contract QuantumSwapRouter is IQuantumSwapRouter {
 	function _quote(uint256 amountA, uint256 reserveA, uint256 reserveB) internal pure returns (uint256 amountB) {
 		require(amountA > 0, "Router: INSUFFICIENT_AMOUNT");
 		require(reserveA > 0 && reserveB > 0, "Router: INSUFFICIENT_LIQUIDITY");
+		
+		// Enhanced validation: Check for overflow protection
+		require(amountA <= type(uint128).max, "Router: AMOUNT_TOO_LARGE");
+		require(reserveA <= type(uint128).max && reserveB <= type(uint128).max, "Router: RESERVE_TOO_LARGE");
+		
+		// Check for reasonable price ratio to prevent extreme quotes
+		uint256 priceRatio = (reserveB * 10000) / reserveA;
+		require(priceRatio >= 1 && priceRatio <= 100000000, "Router: INVALID_PRICE_RATIO");
+		
 		amountB = (amountA * reserveB) / reserveA;
 	}
 
 	function _getAmountOut(uint256 amountIn, uint256 reserveIn, uint256 reserveOut) internal pure returns (uint256 amountOut) {
 		require(amountIn > 0, "Router: INSUFFICIENT_INPUT");
 		require(reserveIn > 0 && reserveOut > 0, "Router: INSUFFICIENT_LIQUIDITY");
+		
+		// Enhanced validation: Check for reasonable input amounts
+		require(amountIn <= type(uint128).max, "Router: AMOUNT_IN_TOO_LARGE");
+		require(reserveIn <= type(uint128).max && reserveOut <= type(uint128).max, "Router: RESERVE_TOO_LARGE");
+		
+		// Check for maximum price impact (50% of reserves)
+		require(amountIn <= (reserveIn / 2), "Router: PRICE_IMPACT_TOO_HIGH");
+		
 		uint256 amountInWithFee = amountIn * 997;
 		uint256 numerator = amountInWithFee * reserveOut;
 		uint256 denominator = reserveIn * 1000 + amountInWithFee;
 		amountOut = numerator / denominator;
+		
+		// Ensure minimum output amount
+		require(amountOut > 0, "Router: INSUFFICIENT_OUTPUT_AMOUNT");
 	}
 
 	function _getAmountIn(uint256 amountOut, uint256 reserveIn, uint256 reserveOut) internal pure returns (uint256 amountIn) {

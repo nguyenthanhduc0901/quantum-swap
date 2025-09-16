@@ -105,15 +105,31 @@ contract QuantumSwapPair is ERC20, IQuantumSwapPair {
         require(balance0 <= type(uint112).max && balance1 <= type(uint112).max, "PAIR: OVERFLOW");
         uint32 blockTimestamp = _currentBlockTimestamp();
         uint32 timeElapsed = blockTimestamp - blockTimestampLast; // overflow is desired
+        
+        // Oracle manipulation protection: Cap timeElapsed to prevent extreme price manipulation
+        // Maximum 1 hour (3600 seconds) between updates to prevent oracle attacks
+        if (timeElapsed > 3600) {
+            timeElapsed = 3600;
+        }
+        
         if (timeElapsed > 0 && _reserve0 != 0 && _reserve1 != 0) {
-            // price0 = reserve1 / reserve0; accumulate with UQ112x112
-            price0CumulativeLast +=
-                uint256(UQ112x112.encode(_reserve1).uqdiv(_reserve0).q) *
-                timeElapsed;
-            // price1 = reserve0 / reserve1
-            price1CumulativeLast +=
-                uint256(UQ112x112.encode(_reserve0).uqdiv(_reserve1).q) *
-                timeElapsed;
+            // Additional protection: Check for extreme price changes
+            uint256 currentPrice0 = uint256(UQ112x112.encode(_reserve1).uqdiv(_reserve0).q);
+            uint256 currentPrice1 = uint256(UQ112x112.encode(_reserve0).uqdiv(_reserve1).q);
+            
+            // Only update if reserves have changed significantly (minimum 0.1% change)
+            uint256 reserve0Change = balance0 > _reserve0 ? 
+                ((balance0 - _reserve0) * 1000) / _reserve0 : 
+                ((_reserve0 - balance0) * 1000) / _reserve0;
+            uint256 reserve1Change = balance1 > _reserve1 ? 
+                ((balance1 - _reserve1) * 1000) / _reserve1 : 
+                ((_reserve1 - balance1) * 1000) / _reserve1;
+            
+            // Update price accumulators only if there's meaningful change
+            if (reserve0Change >= 1 || reserve1Change >= 1) {
+                price0CumulativeLast += currentPrice0 * timeElapsed;
+                price1CumulativeLast += currentPrice1 * timeElapsed;
+            }
         }
         reserve0 = uint112(balance0);
         reserve1 = uint112(balance1);
@@ -180,6 +196,12 @@ contract QuantumSwapPair is ERC20, IQuantumSwapPair {
         require(amount0Out < _reserve0 && amount1Out < _reserve1, "PAIR: INSUFFICIENT_LIQUIDITY");
         require(to != token0 && to != token1, "PAIR: INVALID_TO");
 
+        // MEV Protection: Check for suspiciously large swaps (>10% of reserves)
+        require(amount0Out <= (_reserve0 * 1000) / 10000 && amount1Out <= (_reserve1 * 1000) / 10000, "PAIR: SWAP_TOO_LARGE");
+
+        // MEV Protection: Minimum swap amount to prevent dust attacks
+        require(amount0Out >= 1000 || amount1Out >= 1000, "PAIR: SWAP_TOO_SMALL");
+
         if (amount0Out > 0) require(IERC20(token0).transfer(to, amount0Out), "PAIR: TO0_FAIL");
         if (amount1Out > 0) require(IERC20(token1).transfer(to, amount1Out), "PAIR: TO1_FAIL");
         if (data.length > 0) IQuantumSwapCallee(to).quantumSwapCall(msg.sender, amount0Out, amount1Out, data);
@@ -190,6 +212,10 @@ contract QuantumSwapPair is ERC20, IQuantumSwapPair {
         uint256 amount0In = balance0 > (uint256(_reserve0) - amount0Out) ? balance0 - (uint256(_reserve0) - amount0Out) : 0;
         uint256 amount1In = balance1 > (uint256(_reserve1) - amount1Out) ? balance1 - (uint256(_reserve1) - amount1Out) : 0;
         require(amount0In > 0 || amount1In > 0, "PAIR: INSUFFICIENT_INPUT");
+
+        // MEV Protection: Check for extreme price impact (>5%)
+        require((amount0In == 0 || (amount0In * 10000) / _reserve0 <= 500) && 
+                (amount1In == 0 || (amount1In * 10000) / _reserve1 <= 500), "PAIR: PRICE_IMPACT_TOO_HIGH");
 
         // Adjusted balances to account for 0.3% swap fee
         require(

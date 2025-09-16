@@ -52,6 +52,10 @@ interface IQuantumSwapFactory {
     /// @dev Only callable by the current `feeToSetter`.
     /// @param _feeToSetter The new fee setter address
     function setFeeToSetter(address _feeToSetter) external;
+
+    /// @notice Returns the pause state of the factory
+    /// @return paused True if the factory is paused
+    function paused() external view returns (bool paused);
 }
 
 

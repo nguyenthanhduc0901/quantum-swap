@@ -7,8 +7,21 @@
     "build": "hardhat compile",
     "clean": "hardhat clean",
     "test": "hardhat test",
+    "test:fuzz": "hardhat test test/Fuzz.test.ts",
+    "test:integration": "hardhat test test/Integration.test.ts",
+    "test:security": "hardhat test test/Security.test.ts",
+    "test:all": "hardhat test",
     "node": "hardhat node",
-    "deploy": "hardhat run --network hardhat scripts/placeholder.script.ts"
+    "deploy:local": "hardhat run scripts/deploy-local.ts --network localhost",
+    "deploy:sepolia": "hardhat run scripts/deploy-production.ts --network sepolia",
+    "deploy:mainnet": "hardhat run scripts/deploy-production.ts --network mainnet",
+    "verify:sepolia": "hardhat verify --network sepolia",
+    "verify:mainnet": "hardhat verify --network mainnet",
+    "monitor:start": "ts-node scripts/monitor.ts start",
+    "monitor:stop": "ts-node scripts/monitor.ts stop",
+    "monitor:status": "ts-node scripts/monitor.ts status",
+    "gas-report": "REPORT_GAS=true hardhat test",
+    "coverage": "hardhat coverage"
   },
   "devDependencies": {
     "hardhat": "*",

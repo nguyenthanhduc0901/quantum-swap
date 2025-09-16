@@ -1,0 +1,49 @@
+{
+  "factory": "0x0000000000000000000000000000000000000000",
+  "router": "0x0000000000000000000000000000000000000000",
+  "securityAudit": "0x0000000000000000000000000000000000000000",
+  "circuitBreaker": "0x0000000000000000000000000000000000000000",
+  "rpcUrl": "http://localhost:8545",
+  "alertWebhook": "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK",
+  "checkInterval": 60,
+  "networks": {
+    "localhost": {
+      "factory": "0x0000000000000000000000000000000000000000",
+      "router": "0x0000000000000000000000000000000000000000",
+      "securityAudit": "0x0000000000000000000000000000000000000000",
+      "circuitBreaker": "0x0000000000000000000000000000000000000000",
+      "rpcUrl": "http://localhost:8545"
+    },
+    "sepolia": {
+      "factory": "0x0000000000000000000000000000000000000000",
+      "router": "0x0000000000000000000000000000000000000000",
+      "securityAudit": "0x0000000000000000000000000000000000000000",
+      "circuitBreaker": "0x0000000000000000000000000000000000000000",
+      "rpcUrl": "https://sepolia.infura.io/v3/YOUR_INFURA_PROJECT_ID"
+    },
+    "mainnet": {
+      "factory": "0x0000000000000000000000000000000000000000",
+      "router": "0x0000000000000000000000000000000000000000",
+      "securityAudit": "0x0000000000000000000000000000000000000000",
+      "circuitBreaker": "0x0000000000000000000000000000000000000000",
+      "rpcUrl": "https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID"
+    }
+  },
+  "alerts": {
+    "enabled": true,
+    "webhook": "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK",
+    "email": "admin@quantumswap.com",
+    "severity": {
+      "LOW": false,
+      "MEDIUM": true,
+      "HIGH": true,
+      "CRITICAL": true
+    }
+  },
+  "thresholds": {
+    "maxPriceImpact": 0.1,
+    "minLiquidity": 1000,
+    "maxOracleDelay": 3600,
+    "maxRateLimitExceeded": 10
+  }
+}
