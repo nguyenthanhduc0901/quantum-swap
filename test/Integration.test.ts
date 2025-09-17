@@ -61,6 +61,9 @@ describe("QuantumSwap Integration Tests", function () {
       await dai.mint(user.address, mintAmount);
       await wbtc.mint(user.address, ethers.parseUnits("1000", 8));
       await link.mint(user.address, mintAmount);
+      
+      // Mint WETH for users (WETH is a special ERC20 that can be minted)
+      await weth.connect(user).deposit({ value: ethers.parseEther("1000") });
     }
 
     return {
@@ -113,9 +116,9 @@ describe("QuantumSwap Integration Tests", function () {
       ];
 
       for (const [tokenA, tokenB, amountA, amountB] of liquidityPairs) {
-        await tokenA.approve(await router.getAddress(), amountA);
-        await tokenB.approve(await router.getAddress(), amountB);
-        await router.addLiquidity(
+        await tokenA.connect(user1).approve(await router.getAddress(), amountA);
+        await tokenB.connect(user1).approve(await router.getAddress(), amountB);
+        await router.connect(user1).addLiquidity(
           await tokenA.getAddress(),
           await tokenB.getAddress(),
           amountA,
@@ -139,7 +142,7 @@ describe("QuantumSwap Integration Tests", function () {
         const [tokenIn, tokenMid, tokenOut] = path;
         const amountIn = ethers.parseEther("10");
 
-        await tokenIn.approve(await router.getAddress(), amountIn);
+        await tokenIn.connect(user1).approve(await router.getAddress(), amountIn);
 
         await expect(
           router.swapExactTokensForTokens(
@@ -169,9 +172,9 @@ describe("QuantumSwap Integration Tests", function () {
       await factory.createPair(await weth.getAddress(), await usdc.getAddress());
 
       // Add initial liquidity
-      await weth.approve(await router.getAddress(), ethers.parseEther("1000"));
-      await usdc.approve(await router.getAddress(), ethers.parseUnits("2000000", 6));
-      await router.addLiquidity(
+      await weth.connect(user1).approve(await router.getAddress(), ethers.parseEther("1000"));
+      await usdc.connect(user1).approve(await router.getAddress(), ethers.parseUnits("2000000", 6));
+      await router.connect(user1).addLiquidity(
         await weth.getAddress(),
         await usdc.getAddress(),
         ethers.parseEther("1000"),
@@ -255,9 +258,9 @@ describe("QuantumSwap Integration Tests", function () {
       expect(reason).to.equal("Zero reserves detected");
 
       // Add liquidity
-      await weth.approve(await router.getAddress(), ethers.parseEther("1000"));
-      await usdc.approve(await router.getAddress(), ethers.parseUnits("2000000", 6));
-      await router.addLiquidity(
+      await weth.connect(user1).approve(await router.getAddress(), ethers.parseEther("1000"));
+      await usdc.connect(user1).approve(await router.getAddress(), ethers.parseUnits("2000000", 6));
+      await router.connect(user1).addLiquidity(
         await weth.getAddress(),
         await usdc.getAddress(),
         ethers.parseEther("1000"),
@@ -298,9 +301,9 @@ describe("QuantumSwap Integration Tests", function () {
       await factory.createPair(await weth.getAddress(), await usdc.getAddress());
 
       // Add liquidity
-      await weth.approve(await router.getAddress(), ethers.parseEther("1000"));
-      await usdc.approve(await router.getAddress(), ethers.parseUnits("2000000", 6));
-      await router.addLiquidity(
+      await weth.connect(user1).approve(await router.getAddress(), ethers.parseEther("1000"));
+      await usdc.connect(user1).approve(await router.getAddress(), ethers.parseUnits("2000000", 6));
+      await router.connect(user1).addLiquidity(
         await weth.getAddress(),
         await usdc.getAddress(),
         ethers.parseEther("1000"),
@@ -422,9 +425,9 @@ describe("QuantumSwap Integration Tests", function () {
       await factory.createPair(await weth.getAddress(), await usdc.getAddress());
 
       // Add liquidity
-      await weth.approve(await router.getAddress(), ethers.parseEther("10000"));
-      await usdc.approve(await router.getAddress(), ethers.parseUnits("20000000", 6));
-      await router.addLiquidity(
+      await weth.connect(user1).approve(await router.getAddress(), ethers.parseEther("10000"));
+      await usdc.connect(user1).approve(await router.getAddress(), ethers.parseUnits("20000000", 6));
+      await router.connect(user1).addLiquidity(
         await weth.getAddress(),
         await usdc.getAddress(),
         ethers.parseEther("10000"),
@@ -488,10 +491,10 @@ describe("QuantumSwap Integration Tests", function () {
 
       // Add very large liquidity
       const largeAmount = ethers.parseEther("1000000");
-      await weth.approve(await router.getAddress(), largeAmount);
-      await usdc.approve(await router.getAddress(), ethers.parseUnits("2000000000", 6));
+      await weth.connect(user1).approve(await router.getAddress(), largeAmount);
+      await usdc.connect(user1).approve(await router.getAddress(), ethers.parseUnits("2000000000", 6));
 
-      const tx = await router.addLiquidity(
+      const tx = await router.connect(user1).addLiquidity(
         await weth.getAddress(),
         await usdc.getAddress(),
         largeAmount,
@@ -506,8 +509,8 @@ describe("QuantumSwap Integration Tests", function () {
       expect(receipt?.status).to.equal(1);
 
       // Test large swaps
-      await weth.approve(await router.getAddress(), ethers.parseEther("100000"));
-      const swapTx = await router.swapExactTokensForTokens(
+      await weth.connect(user1).approve(await router.getAddress(), ethers.parseEther("100000"));
+      const swapTx = await router.connect(user1).swapExactTokensForTokens(
         ethers.parseEther("100000"),
         0,
         [await weth.getAddress(), await usdc.getAddress()],

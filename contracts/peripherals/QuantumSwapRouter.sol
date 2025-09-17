@@ -51,8 +51,8 @@ contract QuantumSwapRouter is IQuantumSwapRouter {
 		require(reserveA <= type(uint128).max && reserveB <= type(uint128).max, "Router: RESERVE_TOO_LARGE");
 		
 		// Check for reasonable price ratio to prevent extreme quotes
-		uint256 priceRatio = (reserveB * 10000) / reserveA;
-		require(priceRatio >= 1 && priceRatio <= 100000000, "Router: INVALID_PRICE_RATIO");
+		// Note: This validation is removed as it doesn't handle different token decimals properly
+		// The original Uniswap V2 doesn't have this validation
 		
 		amountB = (amountA * reserveB) / reserveA;
 	}

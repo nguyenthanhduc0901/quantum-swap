@@ -33,10 +33,15 @@ QuantumSwap/
 │   ├── IQuantumSwapFactory.sol
 │   ├── IQuantumSwapPair.sol
 │   └── IQuantumSwapRouter.sol
-├── scripts/                     # Deployment scripts
+├── scripts/                     # Deployment and initialization scripts
 │   ├── deploy.ts                    # Main deployment script
 │   ├── deploy-local.ts              # Local deployment
-│   └── placeholder.script.ts        # Placeholder script
+│   ├── deploy-production.ts         # Production deployment
+│   ├── init-all.js                  # Master initialization script
+│   ├── init-pools.js                # Create multiple pools with liquidity
+│   ├── update-frontend-constants.js # Update frontend constants
+│   ├── monitor.ts                   # Contract monitoring script
+│   └── README.md                    # Scripts documentation
 ├── test/                        # Test suites
 │   ├── QuantumSwap.test.ts          # Main protocol tests
 │   └── placeholder.test.ts          # Placeholder tests
@@ -102,27 +107,75 @@ npx hardhat test test/QuantumSwap.test.ts
 - Edge cases and error conditions
 - Gas optimization verification
 
-## 🚀 Deployment
+## 🚀 Quick Start
 
-### Local Development
+### One-Command Setup (Recommended)
+For frontend development, run the complete initialization script:
+
 ```bash
-# Start local Hardhat node
+# Start Hardhat node (in one terminal)
 npm run node
 
-# Deploy to local network
-npx hardhat run scripts/deploy-local.ts --network localhost
+# Initialize everything (in another terminal)
+npm run init
 ```
 
-### Mainnet/Testnet Deployment
+This will:
+1. Deploy all contracts (Factory, Router, WETH)
+2. Deploy 8 tokens (WETH, DAI, USDC, USDT, LINK, UNI, AAVE, WBTC)
+3. Create 10 trading pools with liquidity
+4. Generate frontend constants automatically
+5. Ready for frontend development
+
+### Production Deployment
 ```bash
-# Deploy to specified network
-npx hardhat run scripts/deploy.ts --network <network-name>
+# Deploy to Sepolia testnet
+npm run deploy:sepolia
+
+# Deploy to mainnet
+npm run deploy:mainnet
 ```
+
+### Available Scripts
+
+- **`init-complete.ts`**: Complete TypeScript initialization (recommended for development)
+- **`deploy-production.ts`**: Production deployment with verification
+- **`monitor.ts`**: Contract monitoring and health checking
 
 ### Deployment Order
 1. **QuantumSwapFactory**: Deploy factory contract
-2. **WETH**: Deploy wrapped ETH contract
+2. **WETH**: Deploy wrapped ETH contract  
 3. **QuantumSwapRouter**: Deploy router with factory and WETH addresses
+4. **Pools**: Create trading pairs with initial liquidity
+5. **Frontend**: Update constants for frontend integration
+
+## 🏊 Created Pools
+
+After running `init-complete.ts`, the following pools will be created with liquidity:
+
+| Pool | Token A | Token B | Liquidity A | Liquidity B |
+|------|---------|---------|-------------|-------------|
+| WETH/USDC | WETH | USDC | 100 WETH | 200,000 USDC |
+| WETH/DAI | WETH | DAI | 50 WETH | 100,000 DAI |
+| USDC/USDT | USDC | USDT | 100,000 USDC | 100,000 USDT |
+| LINK/WETH | LINK | WETH | 1,000 LINK | 10 WETH |
+| UNI/WETH | UNI | WETH | 500 UNI | 5 WETH |
+| AAVE/WETH | AAVE | WETH | 100 AAVE | 2 WETH |
+| DAI/USDC | DAI | USDC | 50,000 DAI | 50,000 USDC |
+| LINK/USDC | LINK | USDC | 500 LINK | 10,000 USDC |
+| UNI/USDC | UNI | USDC | 200 UNI | 5,000 USDC |
+| WBTC/WETH | WBTC | WETH | 10 WBTC | 200 WETH |
+
+## 🪙 Supported Tokens
+
+- **WETH**: Wrapped Ether (18 decimals)
+- **DAI**: Dai Stablecoin (18 decimals)
+- **USDC**: USD Coin (6 decimals)
+- **USDT**: Tether USD (6 decimals)
+- **LINK**: ChainLink Token (18 decimals)
+- **UNI**: Uniswap Token (18 decimals)
+- **AAVE**: Aave Token (18 decimals)
+- **WBTC**: Wrapped Bitcoin (8 decimals)
 
 ## 📊 Key Metrics
 
@@ -144,6 +197,56 @@ Create a `.env` file for network configuration:
 PRIVATE_KEY=your_private_key
 RPC_URL=your_rpc_url
 ETHERSCAN_API_KEY=your_etherscan_key
+```
+
+## 🛠️ Development Workflow
+
+### Frontend Development
+1. Start Hardhat node: `npx hardhat node --port 8545`
+2. Initialize pools: `node scripts/init-all.js`
+3. Start frontend: `cd ../frontend && npm run dev`
+4. Connect wallet to localhost:8545 (Chain ID: 31337)
+
+### Testing New Features
+1. Run tests: `npm test`
+2. Deploy to local: `npx hardhat run scripts/deploy.ts --network localhost`
+3. Test with frontend or scripts
+
+### Adding New Pools
+1. Modify `scripts/init-pools.js`
+2. Add new token deployment
+3. Add pool configuration
+4. Update `scripts/update-frontend-constants.js`
+5. Run `node scripts/init-all.js`
+
+## 🚨 Troubleshooting
+
+### Common Issues
+
+**Insufficient Funds Error**
+```bash
+# Reduce amounts in init-pools.js
+# Decrease WETH amounts or token mint amounts
+```
+
+**Contract Already Deployed**
+```bash
+# Skip deployment, just create pools
+npx hardhat run scripts/init-pools.js --network localhost
+node scripts/update-frontend-constants.js
+```
+
+**Frontend Not Updated**
+```bash
+# Manually update constants
+node scripts/update-frontend-constants.js
+```
+
+**Port Already in Use**
+```bash
+# Use different port
+npx hardhat node --port 8546
+# Update network config accordingly
 ```
 
 ## 📚 Dependencies
@@ -173,11 +276,26 @@ ETHERSCAN_API_KEY=your_etherscan_key
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
+## 📋 Scripts Reference
+
+| Script | Purpose | Usage |
+|--------|---------|-------|
+| `init-complete.ts` | Complete development setup | `npm run init` |
+| `deploy-production.ts` | Production deployment | `npm run deploy:sepolia` / `npm run deploy:mainnet` |
+| `monitor.ts` | Contract monitoring | `npm run monitor:start` |
+
 ## 🔗 Related Projects
 
 - **Frontend**: React-based DEX interface (see `/frontend` directory)
-- **Documentation**: Comprehensive API documentation
-- **Analytics**: Trading analytics and metrics
+- **Scripts**: Comprehensive initialization and deployment scripts
+- **Documentation**: Detailed API and usage documentation
+
+## 📞 Support
+
+For issues or questions:
+1. Check the troubleshooting section above
+2. Review the scripts documentation in `/scripts/README.md`
+3. Check test files for usage examples
 
 ---
 

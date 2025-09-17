@@ -12,7 +12,7 @@
     "test:security": "hardhat test test/Security.test.ts",
     "test:all": "hardhat test",
     "node": "hardhat node",
-    "deploy:local": "hardhat run scripts/deploy-local.ts --network localhost",
+    "init": "hardhat run scripts/init-complete.ts --network localhost",
     "deploy:sepolia": "hardhat run scripts/deploy-production.ts --network sepolia",
     "deploy:mainnet": "hardhat run scripts/deploy-production.ts --network mainnet",
     "verify:sepolia": "hardhat verify --network sepolia",

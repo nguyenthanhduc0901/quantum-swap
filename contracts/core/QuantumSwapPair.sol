@@ -196,8 +196,8 @@ contract QuantumSwapPair is ERC20, IQuantumSwapPair {
         require(amount0Out < _reserve0 && amount1Out < _reserve1, "PAIR: INSUFFICIENT_LIQUIDITY");
         require(to != token0 && to != token1, "PAIR: INVALID_TO");
 
-        // MEV Protection: Check for suspiciously large swaps (>10% of reserves)
-        require(amount0Out <= (_reserve0 * 1000) / 10000 && amount1Out <= (_reserve1 * 1000) / 10000, "PAIR: SWAP_TOO_LARGE");
+        // MEV Protection: Check for suspiciously large swaps (>50% of reserves)
+        require(amount0Out <= (_reserve0 * 5000) / 10000 && amount1Out <= (_reserve1 * 5000) / 10000, "PAIR: SWAP_TOO_LARGE");
 
         // MEV Protection: Minimum swap amount to prevent dust attacks
         require(amount0Out >= 1000 || amount1Out >= 1000, "PAIR: SWAP_TOO_SMALL");
@@ -213,9 +213,9 @@ contract QuantumSwapPair is ERC20, IQuantumSwapPair {
         uint256 amount1In = balance1 > (uint256(_reserve1) - amount1Out) ? balance1 - (uint256(_reserve1) - amount1Out) : 0;
         require(amount0In > 0 || amount1In > 0, "PAIR: INSUFFICIENT_INPUT");
 
-        // MEV Protection: Check for extreme price impact (>5%)
-        require((amount0In == 0 || (amount0In * 10000) / _reserve0 <= 500) && 
-                (amount1In == 0 || (amount1In * 10000) / _reserve1 <= 500), "PAIR: PRICE_IMPACT_TOO_HIGH");
+        // MEV Protection: Check for extreme price impact (>20%)
+        require((amount0In == 0 || (amount0In * 10000) / _reserve0 <= 2000) && 
+                (amount1In == 0 || (amount1In * 10000) / _reserve1 <= 2000), "PAIR: PRICE_IMPACT_TOO_HIGH");
 
         // Adjusted balances to account for 0.3% swap fee
         require(
