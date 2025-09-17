@@ -49,9 +49,9 @@ describe("QuantumSwap Fuzz Tests", function () {
       const { factory, owner } = await loadFixture(deployContractsFixture);
 
       // Generate random addresses
-      const randomAddresses = [];
+      const randomAddresses: string[] = [];
       for (let i = 0; i < 10; i++) {
-        randomAddresses.push(ethers.Wallet.createRandom().address);
+        randomAddresses.push((ethers.Wallet.createRandom() as any).address);
       }
 
       // Try to create pairs with random addresses
@@ -193,9 +193,9 @@ describe("QuantumSwap Fuzz Tests", function () {
             owner.address,
             Math.floor(Date.now() / 1000) + 3600
           );
-        } catch (error) {
+        } catch (error: unknown) {
           // Expected for some large swaps due to our security measures
-          expect(error.message).to.include("PAIR: PRICE_IMPACT_TOO_HIGH");
+          expect((error as Error).message).to.include("PAIR: PRICE_IMPACT_TOO_HIGH");
         }
       }
     });
@@ -270,10 +270,10 @@ describe("QuantumSwap Fuzz Tests", function () {
             owner.address,
             Math.floor(Date.now() / 1000) + 3600
           );
-        } catch (error) {
+        } catch (error: unknown) {
           // Large swaps should fail due to price impact protection
           if (swapSize > ethers.parseEther("100")) {
-            expect(error.message).to.include("PAIR: PRICE_IMPACT_TOO_HIGH");
+            expect((error as Error).message).to.include("PAIR: PRICE_IMPACT_TOO_HIGH");
           }
         }
       }

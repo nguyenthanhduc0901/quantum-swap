@@ -63,7 +63,7 @@ describe("QuantumSwap Integration Tests", function () {
       await link.mint(user.address, mintAmount);
       
       // Mint WETH for users (WETH is a special ERC20 that can be minted)
-      await weth.connect(user).deposit({ value: ethers.parseEther("1000") });
+      await (weth as any).connect(user).deposit({ value: ethers.parseEther("1000") });
     }
 
     return {
@@ -116,11 +116,11 @@ describe("QuantumSwap Integration Tests", function () {
       ];
 
       for (const [tokenA, tokenB, amountA, amountB] of liquidityPairs) {
-        await tokenA.connect(user1).approve(await router.getAddress(), amountA);
-        await tokenB.connect(user1).approve(await router.getAddress(), amountB);
-        await router.connect(user1).addLiquidity(
-          await tokenA.getAddress(),
-          await tokenB.getAddress(),
+        await (tokenA as any).connect(user1).approve(await (router as any).getAddress(), amountA);
+        await (tokenB as any).connect(user1).approve(await (router as any).getAddress(), amountB);
+        await (router as any).connect(user1).addLiquidity(
+          await (tokenA as any).getAddress(),
+          await (tokenB as any).getAddress(),
           amountA,
           amountB,
           0,
@@ -142,13 +142,13 @@ describe("QuantumSwap Integration Tests", function () {
         const [tokenIn, tokenMid, tokenOut] = path;
         const amountIn = ethers.parseEther("10");
 
-        await tokenIn.connect(user1).approve(await router.getAddress(), amountIn);
+        await (tokenIn as any).connect(user1).approve(await (router as any).getAddress(), amountIn);
 
         await expect(
-          router.swapExactTokensForTokens(
+          (router as any).swapExactTokensForTokens(
             amountIn,
             0,
-            [await tokenIn.getAddress(), await tokenMid.getAddress(), await tokenOut.getAddress()],
+            [await (tokenIn as any).getAddress(), await (tokenMid as any).getAddress(), await (tokenOut as any).getAddress()],
             user2.address,
             Math.floor(Date.now() / 1000) + 3600
           )
@@ -172,9 +172,9 @@ describe("QuantumSwap Integration Tests", function () {
       await factory.createPair(await weth.getAddress(), await usdc.getAddress());
 
       // Add initial liquidity
-      await weth.connect(user1).approve(await router.getAddress(), ethers.parseEther("1000"));
-      await usdc.connect(user1).approve(await router.getAddress(), ethers.parseUnits("2000000", 6));
-      await router.connect(user1).addLiquidity(
+      await (weth as any).connect(user1).approve(await (router as any).getAddress(), ethers.parseEther("1000"));
+      await (usdc as any).connect(user1).approve(await (router as any).getAddress(), ethers.parseUnits("2000000", 6));
+      await (router as any).connect(user1).addLiquidity(
         await weth.getAddress(),
         await usdc.getAddress(),
         ethers.parseEther("1000"),
@@ -189,9 +189,9 @@ describe("QuantumSwap Integration Tests", function () {
       const operations = [
         // User 1: Add more liquidity
         async () => {
-          await weth.connect(user1).approve(await router.getAddress(), ethers.parseEther("100"));
-          await usdc.connect(user1).approve(await router.getAddress(), ethers.parseUnits("200000", 6));
-          return router.connect(user1).addLiquidity(
+          await (weth as any).connect(user1).approve(await (router as any).getAddress(), ethers.parseEther("100"));
+          await (usdc as any).connect(user1).approve(await (router as any).getAddress(), ethers.parseUnits("200000", 6));
+          return (router as any).connect(user1).addLiquidity(
             await weth.getAddress(),
             await usdc.getAddress(),
             ethers.parseEther("100"),
@@ -204,8 +204,8 @@ describe("QuantumSwap Integration Tests", function () {
         },
         // User 2: Swap WETH for USDC
         async () => {
-          await weth.connect(user2).approve(await router.getAddress(), ethers.parseEther("10"));
-          return router.connect(user2).swapExactTokensForTokens(
+          await (weth as any).connect(user2).approve(await (router as any).getAddress(), ethers.parseEther("10"));
+          return (router as any).connect(user2).swapExactTokensForTokens(
             ethers.parseEther("10"),
             0,
             [await weth.getAddress(), await usdc.getAddress()],
@@ -215,8 +215,8 @@ describe("QuantumSwap Integration Tests", function () {
         },
         // User 3: Swap USDC for WETH
         async () => {
-          await usdc.connect(user3).approve(await router.getAddress(), ethers.parseUnits("10000", 6));
-          return router.connect(user3).swapExactTokensForTokens(
+          await (usdc as any).connect(user3).approve(await (router as any).getAddress(), ethers.parseUnits("10000", 6));
+          return (router as any).connect(user3).swapExactTokensForTokens(
             ethers.parseUnits("10000", 6),
             0,
             [await usdc.getAddress(), await weth.getAddress()],
@@ -258,9 +258,9 @@ describe("QuantumSwap Integration Tests", function () {
       expect(reason).to.equal("Zero reserves detected");
 
       // Add liquidity
-      await weth.connect(user1).approve(await router.getAddress(), ethers.parseEther("1000"));
-      await usdc.connect(user1).approve(await router.getAddress(), ethers.parseUnits("2000000", 6));
-      await router.connect(user1).addLiquidity(
+      await (weth as any).connect(user1).approve(await (router as any).getAddress(), ethers.parseEther("1000"));
+      await (usdc as any).connect(user1).approve(await (router as any).getAddress(), ethers.parseUnits("2000000", 6));
+      await (router as any).connect(user1).addLiquidity(
         await weth.getAddress(),
         await usdc.getAddress(),
         ethers.parseEther("1000"),
@@ -301,9 +301,9 @@ describe("QuantumSwap Integration Tests", function () {
       await factory.createPair(await weth.getAddress(), await usdc.getAddress());
 
       // Add liquidity
-      await weth.connect(user1).approve(await router.getAddress(), ethers.parseEther("1000"));
-      await usdc.connect(user1).approve(await router.getAddress(), ethers.parseUnits("2000000", 6));
-      await router.connect(user1).addLiquidity(
+      await (weth as any).connect(user1).approve(await (router as any).getAddress(), ethers.parseEther("1000"));
+      await (usdc as any).connect(user1).approve(await (router as any).getAddress(), ethers.parseUnits("2000000", 6));
+      await (router as any).connect(user1).addLiquidity(
         await weth.getAddress(),
         await usdc.getAddress(),
         ethers.parseEther("1000"),
@@ -425,9 +425,9 @@ describe("QuantumSwap Integration Tests", function () {
       await factory.createPair(await weth.getAddress(), await usdc.getAddress());
 
       // Add liquidity
-      await weth.connect(user1).approve(await router.getAddress(), ethers.parseEther("10000"));
-      await usdc.connect(user1).approve(await router.getAddress(), ethers.parseUnits("20000000", 6));
-      await router.connect(user1).addLiquidity(
+      await (weth as any).connect(user1).approve(await (router as any).getAddress(), ethers.parseEther("10000"));
+      await (usdc as any).connect(user1).approve(await (router as any).getAddress(), ethers.parseUnits("20000000", 6));
+      await (router as any).connect(user1).addLiquidity(
         await weth.getAddress(),
         await usdc.getAddress(),
         ethers.parseEther("10000"),
@@ -445,23 +445,23 @@ describe("QuantumSwap Integration Tests", function () {
         const isWethToUsdc = Math.random() > 0.5;
 
         if (isWethToUsdc) {
-          await weth.connect(user2).approve(await router.getAddress(), amount);
+          await (weth as any).connect(user2).approve(await (router as any).getAddress(), amount);
           trades.push(
-            router.connect(user2).swapExactTokensForTokens(
+            (router as any).connect(user2).swapExactTokensForTokens(
               amount,
               0,
-              [await weth.getAddress(), await usdc.getAddress()],
+              [await (weth as any).getAddress(), await (usdc as any).getAddress()],
               user2.address,
               Math.floor(Date.now() / 1000) + 3600
             )
           );
         } else {
-          await usdc.connect(user2).approve(await router.getAddress(), ethers.parseUnits("10000", 6));
+          await (usdc as any).connect(user2).approve(await (router as any).getAddress(), ethers.parseUnits("10000", 6));
           trades.push(
-            router.connect(user2).swapExactTokensForTokens(
+            (router as any).connect(user2).swapExactTokensForTokens(
               ethers.parseUnits("10000", 6),
               0,
-              [await usdc.getAddress(), await weth.getAddress()],
+              [await (usdc as any).getAddress(), await (weth as any).getAddress()],
               user2.address,
               Math.floor(Date.now() / 1000) + 3600
             )
@@ -491,10 +491,10 @@ describe("QuantumSwap Integration Tests", function () {
 
       // Add very large liquidity
       const largeAmount = ethers.parseEther("1000000");
-      await weth.connect(user1).approve(await router.getAddress(), largeAmount);
-      await usdc.connect(user1).approve(await router.getAddress(), ethers.parseUnits("2000000000", 6));
+      await (weth as any).connect(user1).approve(await (router as any).getAddress(), largeAmount);
+      await (usdc as any).connect(user1).approve(await (router as any).getAddress(), ethers.parseUnits("2000000000", 6));
 
-      const tx = await router.connect(user1).addLiquidity(
+      const tx = await (router as any).connect(user1).addLiquidity(
         await weth.getAddress(),
         await usdc.getAddress(),
         largeAmount,
@@ -509,8 +509,8 @@ describe("QuantumSwap Integration Tests", function () {
       expect(receipt?.status).to.equal(1);
 
       // Test large swaps
-      await weth.connect(user1).approve(await router.getAddress(), ethers.parseEther("100000"));
-      const swapTx = await router.connect(user1).swapExactTokensForTokens(
+      await (weth as any).connect(user1).approve(await (router as any).getAddress(), ethers.parseEther("100000"));
+      const swapTx = await (router as any).connect(user1).swapExactTokensForTokens(
         ethers.parseEther("100000"),
         0,
         [await weth.getAddress(), await usdc.getAddress()],
